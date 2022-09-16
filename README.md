@@ -101,6 +101,7 @@
         DefaultPawnClass = BP_PAWN_C.Class;
         }
         ```
+   > ConstructorHelpers 는 UObject의 Constructor에서만 사용 가능
     
 ## 플레이어 입장
 
