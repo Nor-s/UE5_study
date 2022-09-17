@@ -14,3 +14,4 @@ Plugins
 *.suo
 *.xcodeproj
 *.xcworkspace
+.idea
