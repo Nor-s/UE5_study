@@ -2,7 +2,7 @@
 
 
 #include "ABGameMode.h"
-#include "ABPawn.h"
+#include "ABCharacter.h"
 #include "ABPlayerController.h"
 
 
@@ -11,7 +11,7 @@
 AABGameMode::AABGameMode()
 {
 	// 언리얼 오브젝트의 클래스 정보는 언리얼 헤더 툴에 의해 자동으로 생성, StaticClass() 함수 호출해 가져옴
-	DefaultPawnClass = AABPawn::StaticClass();
+	DefaultPawnClass = AABCharacter::StaticClass();
 	PlayerControllerClass = AABPlayerController::StaticClass();
 }
 
