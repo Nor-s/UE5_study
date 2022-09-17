@@ -71,7 +71,14 @@
   - setting>worldsetting
   
   
-  
+## 시간
+
+- 게임 시작 ~ 현재 경과된 시간: `GetWorld()->GetTimeSeconds()`
+- 중지한 시간을 제외한 경과시간: `GetWorld()->GetUnpausedTimeSeconds()`
+
+- 현실 세계의 경과시간: `GetWorld()->GetRealTimeSeconds()`
+- 중지한 시간 제외한 현실 경과 시간: `GetWorld->GetAudioTimeSeconds()`
+ 
 # CH4
 - 게임을 만드는 작업 = 레벨을 구성하는 작업 + 게임플레이 설계하는 작업 
 - 게임 플레임워크: 게임의 규칙을 관리하는 게임 모드 + 플레이어가 조종하는 액터인 폰
