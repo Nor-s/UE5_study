@@ -114,9 +114,22 @@
     > 입력 이벤트와 Tick 이벤트는 매 프레임마다 호출됨. 그러므로 먼저 입력함수를 호출하여 액터를 컨트롤하는것이 좋음
 
 - `bUseControllerDesiredRotation`  속성으로 부드럽게 회전 가능
-- 
 
 ### 참고
 
-- UPREPERTY 아닌 변수들은 초기값 미리 지정 해주는게 좋음
-- 
+- UPROPERTY 아닌 변수들은 초기값 미리 지정 해주는게 좋음
+
+## **컨트롤 설정 변경**
+
+- BindAction 함수: project settings > input > Action Mapping 설정과 연동 가능
+  - IE_Pressed, IE_Released 인자 사용 가능
+
+- 컨트롤 방식 변경 시 카메라 길이 부드럽게 전환
+  - InterpTo 
+    - SpringArm의 길이와 회전 값이 목표값으로 서서히 변경되도록 할 수 있음
+    - 지정한 속력으로 변경됨
+    - UE는 VInterpTo, FInterpTo, RInterpTo 제공함
+
+- 컨트롤 회전 값
+  - GTA 방식에서는 SpringArm의 회전에 사용됨
+  - 디아블로 방식에서는 캐릭터의 방향에 사용됨
