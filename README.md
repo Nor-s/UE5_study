@@ -88,10 +88,35 @@
 
 - 이는 xy 평면에서의 회전행렬 x축 벡터의 정사영을 구하고, 정규화하면 해결할 수 있음
   ```cpp
-- 	auto xAxis =  FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X);
+ 	auto xAxis =  FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X);
 	xAxis.Z = 0;
 	xAxis = xAxis.GetSafeNormal();
-- ```
+  ```
 - 결과값은 캐릭터가 카메라의 시선방향으로 이동할 때 `GetActorForwardVector()` 값과 같음
 
 - LeftRight함수 또한 y축 벡터의 z값을 0으로 설정하고 정규화하면 해결됨.
+
+- 또는 GetControlRotation().Yaw 값만을 사용하여 회전행렬을 구하면됨.
+
+
+## **삼인칭 컨트롤 구현(디아블로 방식)**
+
+- 고정된 삼인칭 시점에서 캐릭터를 따라다니는 컨트롤
+  - 캐릭터의 이동: 상하좌우 키를 조합해 캐릭터가 이동할 방향을 결정
+  - 캐릭터의 회전: 캐릭터는 입력한 방향으로 회전
+  - 카메라 길이: 조금 멀리 떨어진 800cm
+  - 카메라 회전: 카메라의 회전 없이 항상 고정 시선으로 45도 내려다봄
+  - 카메라 줌: 없음, 장애물이 있는 경우 외곽선
+
+- 이 방식은, 상하좌우 키를 조합해 캐릭터의 회전과 이동이 이뤄져야함
+  - 이를 위해 각 축의 입력을 조합해 보관할 벡터 타입 변수도 추가해야함.
+  - 축 입력 이벤트가 발생할 때 새로 선언한 DirectionToMove 멤버 변수를 업데이트하고, Tick로직에서 참고하여 이동
+    > 입력 이벤트와 Tick 이벤트는 매 프레임마다 호출됨. 그러므로 먼저 입력함수를 호출하여 액터를 컨트롤하는것이 좋음
+
+- `bUseControllerDesiredRotation`  속성으로 부드럽게 회전 가능
+- 
+
+### 참고
+
+- UPREPERTY 아닌 변수들은 초기값 미리 지정 해주는게 좋음
+- 
