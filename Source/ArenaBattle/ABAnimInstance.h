@@ -22,4 +22,7 @@ private:
 	// 블루프린트에서 접근하는 키워드 == BlueprintReadOnly, BlueprintReadWrite
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pawn, Meta=(AllowPrivateAccess=true))
 	float CurrentPawnSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pawn, Meta=(AllowPrivateAccess=true))
+	bool IsInAir;
 };
