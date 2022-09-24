@@ -73,3 +73,16 @@
   - 캐릭터 무브먼트 컴포넌트에 이 기능들이 제대로 구현되어 있음
   - IsFalling() 함수를 사용해 폰의 점프 여부 정보를 애님 인스턴스에 보관, 이를 활용해야함
   
+
+## **리타겟팅**
+
+- UE5에서의 리타겟팅은 UE4와 다르게 리타겟팅 메니저가 없음
+    - IK RIG 에셋을 두 개 만들어야함
+
+- [mixamo retargeting](./Docs/Mixamo%20Retargeting.pdf) 참고
+    - 손가락 등 체인 역시 추가해도 됨.
+
+
+### **참고**
+
+- https://velog.io/@myverytinybrain/%EC%96%B8%EB%A6%AC%EC%96%BC-%EC%95%A0%EB%8B%88%EB%A9%94%EC%9D%B4%EC%85%98-%EB%A6%AC%ED%83%80%EA%B2%9F%ED%8C%85
