@@ -19,6 +19,10 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	void PlayAttackMontage();
+	
+private:
+	UFUNCTION()
+	void AnimNotify_AttackHitCheck();
 
 private:
 	// 블루프린트에서 접근하는 키워드 == BlueprintReadOnly, BlueprintReadWrite
