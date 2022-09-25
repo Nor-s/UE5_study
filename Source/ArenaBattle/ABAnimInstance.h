@@ -18,6 +18,8 @@ public:
 	UABAnimInstance();
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+	void PlayAttackMontage();
+
 private:
 	// 블루프린트에서 접근하는 키워드 == BlueprintReadOnly, BlueprintReadWrite
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pawn, Meta=(AllowPrivateAccess=true))
@@ -25,4 +27,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pawn, Meta=(AllowPrivateAccess=true))
 	bool IsInAir;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category=Attack, Meta=(AllowPrivateAccess=true))
+	UAnimMontage* AttackMontage;
 };

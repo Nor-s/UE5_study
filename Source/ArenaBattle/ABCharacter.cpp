@@ -2,6 +2,7 @@
 
 
 #include "ABCharacter.h"
+#include "ABAnimInstance.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -39,6 +40,8 @@ AABCharacter::AABCharacter()
 	ArmLengthSpeed = 3.0f;
 	ArmRotationSpeed = 10.0f;
 	GetCharacterMovement()->JumpZVelocity = 800.0f;
+
+	IsAttacking = false;
 }
 
 // Called when the game starts or when spawned
@@ -56,13 +59,13 @@ void AABCharacter::SetControlMode(EControlMode NewControlMode)
 		// SpringArm->TargetArmLength = 450.0f;
 		// SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
 		ArmLengthTo = 450.0f;
-		// 스프링 암 회전과 컨트롤 회전을 연결
+	// 스프링 암 회전과 컨트롤 회전을 연결
 		SpringArm->bUsePawnControlRotation = true;
 		SpringArm->bInheritPitch = true;
 		SpringArm->bInheritRoll = true;
 		SpringArm->bInheritYaw = true;
 		SpringArm->bDoCollisionTest = true;
-		// 컨트롤 회전과 캐릭터 회전을 분리
+	// 컨트롤 회전과 캐릭터 회전을 분리
 		bUseControllerRotationYaw = false;
 	// 움직이는 방향으로 캐릭터 회전
 		GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -94,17 +97,17 @@ void AABCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength,
-												   ArmLengthTo,
-												   DeltaTime,
-												   ArmLengthSpeed);
-	
+	                                              ArmLengthTo,
+	                                              DeltaTime,
+	                                              ArmLengthSpeed);
+
 	switch (CurrentControlMode)
 	{
 	case EControlMode::DIABLO:
 		SpringArm->SetRelativeRotation(FMath::RInterpTo(SpringArm->GetRelativeRotation(),
-								                         ArmRotationTo,
-								                         DeltaTime,
-								                         ArmRotationSpeed));
+		                                                ArmRotationTo,
+		                                                DeltaTime,
+		                                                ArmRotationSpeed));
 		if (DirectionToMove.SizeSquared() > 0.0f)
 		{
 			// 최종 벡터 방향과 캐릭터의 시선 방향(X축)이 일치해야 하므로 이 MakeFromX 사용
@@ -115,6 +118,15 @@ void AABCharacter::Tick(float DeltaTime)
 	}
 }
 
+// 애님 인스턴스의 OnMontageEnded 델리게이트에 바인딩
+void AABCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	ABAnim = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	ABCHECK(nullptr != ABAnim);
+	ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+}
+
 // Called to bind functionality to input
 void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -122,7 +134,8 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("ViewChange"), EInputEvent::IE_Pressed, this, &AABCharacter::ViewChange);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
-	
+	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AABCharacter::Attack);
+
 	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AABCharacter::UpDown);
 	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AABCharacter::LeftRight);
 	PlayerInputComponent->BindAxis(TEXT("Look Up / Down Mouse"), this, &AABCharacter::LookUp);
@@ -192,4 +205,17 @@ void AABCharacter::ViewChange()
 		SetControlMode(EControlMode::GTA);
 		break;
 	}
+}
+
+void AABCharacter::Attack()
+{
+	if(IsAttacking) return;
+	ABAnim->PlayAttackMontage();
+	IsAttacking = true;
+}
+
+void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	ABCHECK(IsAttacking);
+	IsAttacking = false;
 }
