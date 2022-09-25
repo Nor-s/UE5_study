@@ -6,6 +6,8 @@
 #include "Animation/AnimInstance.h"
 #include "ABAnimInstance.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
 /**
  * 
  */
@@ -19,10 +21,20 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	void PlayAttackMontage();
+	void JumpToAttackMontageSection(int32 NewSection);
+
+public:
+	FOnNextAttackCheckDelegate OnNextAttackCheck;
+	FOnAttackHitCheckDelegate OnAttackHitCheck;
 	
 private:
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
+	
+	UFUNCTION()
+	void AnimNotify_NextAttackCheck();
+
+	FName GetAttackMontageSectionName(int32 Section);
 
 private:
 	// 블루프린트에서 접근하는 키워드 == BlueprintReadOnly, BlueprintReadWrite
@@ -34,4 +46,5 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category=Attack, Meta=(AllowPrivateAccess=true))
 	UAnimMontage* AttackMontage;
+
 };

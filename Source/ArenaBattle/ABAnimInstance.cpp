@@ -38,7 +38,27 @@ void UABAnimInstance::PlayAttackMontage()
 	Montage_Play(AttackMontage, 1.0f);
 }
 
+
+void UABAnimInstance::JumpToAttackMontageSection(int32 NewSection)
+{
+	Montage_JumpToSection(GetAttackMontageSectionName(NewSection), AttackMontage);
+}
+
 void UABAnimInstance::AnimNotify_AttackHitCheck()
 {
-	ABLOG_S(Warning);
+	ABLOG(Warning, TEXT("Attack Hit Check"));
+	OnAttackHitCheck.Broadcast();
+}
+
+void UABAnimInstance::AnimNotify_NextAttackCheck()
+{
+	ABLOG(Warning, TEXT("Next Attack Check"));
+	OnNextAttackCheck.Broadcast();
+}
+
+FName UABAnimInstance::GetAttackMontageSectionName(int32 Section)
+{
+	ABCHECK(FMath::IsWithinInclusive<int32>(Section, 1, 4), NAME_None);
+	ABLOG(Warning, TEXT("Attack%d"), Section);
+	return FName(*FString::Printf(TEXT("Attack%d"), Section));
 }

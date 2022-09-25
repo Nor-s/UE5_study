@@ -59,6 +59,7 @@
 
 - 시그니쳐(Signature)
   - UE이 제공하는 매크로를 통해 정의되는 델리게이트 형식
+  - DECLARE_MULTICAST_DELEGATE 와 같은 매크로로 사용자 정의 델리게이트 생성 가능
 
 - 시그니처 + 멀티캐스트 = 다이내믹 멀티캐스트 델리게이트
     - AddDynamic : C++ 인텔리센스 검색 x
@@ -79,6 +80,18 @@
     - UE는 이를 보고 자동으로 애님 인스턴스 클래스의 'AnimNotify_노티파이명'이라는 이름의 멤버 함수를 찾아 호출
     - 이 함수는 반드시 UFUNCTION 매크로 사용해야함
 
+## **콤보 공격의 구현**
+
+- 공격 동작을 섹션으로 분리
+  - Attack2, Attack3, Attack4
+  - 섹션마다 공격 애니메이션을 하나씩 할당
+  
+- 애니메이션 노티파이 (NextAttackCheck) 는 Branching Point 값으로 틱 타입 설정
+    - Queued 타입은 비동기 방식으로 신호를 받게됨, 적절한 타이밍에 신호를 놓칠 가능성 있음
+    - Queued 값은 사운드, 이펙트 등에 사용
+
+- 주의: 몽타주 에디터 > 애셋 디테일 > Blend Option > Blend Out Trigger Time > 0 으로 설정
+  - 참고: https://blog.naver.com/PostView.naver?blogId=kzh8055&logNo=222044403660
 
 ## 참고
 
