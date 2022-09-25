@@ -1,6 +1,7 @@
 # **CH8 애니메이션 시스템 활용(몽타주, 노티파이)**
 
 - 다단 공격 시스템 제작
+    - [animation montage](./Docs/Animation%20Montage.pdf)
 
 ## **몽타주: 여러 애셋 결합**
 
