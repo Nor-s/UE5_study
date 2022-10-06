@@ -162,3 +162,39 @@ GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
 - 공격 범위가 시각적으로 보이게함
 - DrawDebugHelpers.h 헤더 추가
 - DrawDebugCapsule 함수 사용하여 원이 움직인 궤적 표현
+
+
+## **대미지 프레임워크**
+
+- 감지된 액터에게 대미지를 전달
+- UE 에서 제공하는 대미지 프레임워크 사용하면 간편하게 처리 가능
+
+
+- AACtor::TakeDamage
+  - DamageAmount: 전달할 대미지의 세기
+  - DamageEvent: 대미지 종류
+  - EventInstigator: 공격 명령을 내린 가해자
+  - DamageCauser: 대미지 전달을 위해 사용한 도구
+
+
+- 대미지를 전달하는 행위: 항상 가해자와 피해자가 존재
+  - 가해자 == 피해를 입히는 주체 (폰에게 명령을 내린 플레이어 컨트롤)
+  - EventInstigator == 컨트롤러 정보
+  
+- 공격 범위 내 대미지를 전달하는 로직
+  ```cpp
+  		{
+			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
+
+			FDamageEvent DamageEvent;
+			HitResult.Actor->TakeDamage(50.0f, DamageEvent, GetController(), this);
+		}
+  ```
+  
+- 피해를 입은 액터에 관련 로직
+  - TakeDamage 함수 오버라이드
+  - 디테일 > Actor > can be damaged 속성으로 무적 상태 설정 가능
+
+### 죽는 애니메이션
+
+- 죽은 후, SetActorEnableCollision 함수로 충돌 설정을 꺼서 충돌 이벤트 관리
