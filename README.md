@@ -111,3 +111,47 @@ GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
 ```
 
 > 핫리로드 방식 컴파일 : 기본 설정을 건드리면, 에디터 다시 시작하는게 좋음
+
+
+## 트레이스 채널의 활용
+
+- 물리엔진을 사용해 캐릭터의 공격 기능을 구현
+- 공격 행동: 공격 애니메이션이 일어나는 특정 타이밍에 공격 범위 안에 위치한 액터가 있는지 감지, 감지된 액터에게 대미지를 전달하는 행위
+
+### 트레이스 채널 생성
+
+- 트레이스 설정(Attack 채널을 사용하는 액터의 물리적 행동은 ABCharacter 콜리전 프리셋에만 반응)
+  - 프로젝트 설정 > Collision > Trace 섹션 > Attack 채널 추가 > 기본반응 무시
+  - ABCharacter 프리셋 > Attack 트레이스 채널과의 설정을 블록으로 설정
+
+
+### 공격 로직
+
+- 물리는 월드의 기능 == ``GetWorld()`` 함수로 월드에게 명령을 내림
+- ``SweepSingleByChannel``: 트레이스 채널을 사용하여 물리적 충돌 여부를 가리는 함수
+  - 기본 도형을 인자로 받음
+  - 시작지점 ~ 끝지점을 쓸면서(Sweep) 물리판정이 일어났는지 조사
+  - HitResult: 물리적 충돌이 탐지될 경우, 충돌 결과값을 담을 구조체
+  - Start: 탐색 시작 위치
+  - End: 탐색 끝 위치
+  - Rot: 탐색에 사용할 도형의 회전
+  - TraceChannel: 물리 충돌 감지에 사용할 트레이스 채널 정보
+  - CollisionShape: 탐색에 사용할 기본 도형 정보 (구, 캡슐, 박스)
+  - Params: 탐색 방법에 대한 설정값
+  - ResponseParams: 탐색반응 설정값
+
+- TraceChannel을 C++ 로 가져오는 방법
+  - ECollisionChannel 열거형 사용 
+  - 사용자 오브젝트, 트레이스 채널은 ECC_GameTraceChannel 1번 부터 18번 까지 하나 배정받음.
+  - 배정값은 Config/DefaultEngine.ini 파일에서 확인 가능 (ECC_GameTraceChannel2)
+
+> UE4 에서는 총 32개의 콜리전 채널을 제공함, 32개 중, 여덟 개는 언리얼 엔진이 기본으로 사용하고, 여섯 개는 엔진에서 다른 용도로 사용하도록 예약, 사용자는 나머지 18개만 사용 가능
+
+1. 콜리전 채널 지정 
+2. MakeSphere 탐지에 사용할 도형 생성 
+3. 도형 탐색 영역 지정 
+4. 탐색 방법 지정(공격하는 자신은 탐색대상에서 제외) 
+5. 액터 충돌 탐지 결과얻을 구조체 FHitResult 생성
+
+
+> 언리얼 실행환경... GC... 사용여부확인 == 오브젝트 참조로 판단 ... FHitResult의 Actor는 약포인터로 구현됨.. 따라서 유효한지 점검 필요

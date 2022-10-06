@@ -143,6 +143,8 @@ void AABCharacter::PostInitializeComponents()
 			ABAnim->JumpToAttackMontageSection(CurrentCombo);
 		}
 	});
+
+	ABAnim->OnAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck);
 }
 
 // Called to bind functionality to input
@@ -229,7 +231,6 @@ void AABCharacter::Attack()
 {
 	if (IsAttacking)
 	{
-		ABLOG(Warning, TEXT("IsAttacking"));
 		ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
 		if (CanNextCombo)
 		{
@@ -248,7 +249,6 @@ void AABCharacter::Attack()
 
 void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	ABLOG(Warning, TEXT("OnAttackMontageEnded"));
 	ABCHECK(IsAttacking);
 	ABCHECK(CurrentCombo > 0);
 	IsAttacking = false;
@@ -268,4 +268,25 @@ void AABCharacter::AttackEndComboState()
 	IsComboInputOn = false;
 	CanNextCombo = false;
 	CurrentCombo = 0;
+}
+void AABCharacter::AttackCheck()
+{
+	FHitResult HitResult;
+	// 무시목록: this
+	FCollisionQueryParams Params(NAME_None, false, this);
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		HitResult, 
+		GetActorLocation(), // 탐색 시작: 액터 있는곳
+		GetActorLocation() + GetActorForwardVector() * 200.0f, // 탐색끝: 액터 시선방향 200cm 떨어진곳
+		FQuat::Identity, // 회전값 기본
+		ECollisionChannel::ECC_GameTraceChannel2, // ATTACK 트레이스 채널 사용 
+		FCollisionShape::MakeSphere(50.0f), //50CM 반지름을 가지는 구체 사용
+		Params); 
+	
+	if(bResult) {
+		if(HitResult.GetActor())
+		{
+			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.GetActor()->GetName());
+		}
+	}
 }
