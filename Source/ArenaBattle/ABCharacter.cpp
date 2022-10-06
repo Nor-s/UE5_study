@@ -3,6 +3,7 @@
 
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -47,6 +48,9 @@ AABCharacter::AABCharacter()
 	AttackEndComboState();
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
+
+	AttackRange = 200.0f;
+	AttackRadius = 50.0f;
 }
 
 // Called when the game starts or when spawned
@@ -277,12 +281,31 @@ void AABCharacter::AttackCheck()
 	bool bResult = GetWorld()->SweepSingleByChannel(
 		HitResult, 
 		GetActorLocation(), // 탐색 시작: 액터 있는곳
-		GetActorLocation() + GetActorForwardVector() * 200.0f, // 탐색끝: 액터 시선방향 200cm 떨어진곳
+		GetActorLocation() + GetActorForwardVector() * AttackRange, // 탐색끝: 액터 시선방향으로 공격 범위만큼 떨어진곳
 		FQuat::Identity, // 회전값 기본
 		ECollisionChannel::ECC_GameTraceChannel2, // ATTACK 트레이스 채널 사용 
-		FCollisionShape::MakeSphere(50.0f), //50CM 반지름을 가지는 구체 사용
-		Params); 
-	
+		FCollisionShape::MakeSphere(AttackRadius), //50CM 반지름을 가지는 구체 사용
+		Params);
+
+#if ENABLE_DRAW_DEBUG
+
+	FVector TraceVec = GetActorForwardVector() * AttackRange;
+	FVector Center = GetActorLocation() + TraceVec * 0.5f;
+	float HalfHeight = AttackRange * 0.5f + AttackRadius;
+	FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVec).ToQuat();
+	FColor DrawColor = bResult ? FColor::Green : FColor::Red;
+	float DebugLifeTime = 5.0f;
+
+	DrawDebugCapsule(GetWorld(),
+		Center,
+		HalfHeight,
+		AttackRadius,
+		CapsuleRot,
+		DrawColor,
+		false,
+		DebugLifeTime);
+
+#endif
 	if(bResult) {
 		if(HitResult.GetActor())
 		{

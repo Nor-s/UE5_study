@@ -155,3 +155,10 @@ GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
 
 
 > 언리얼 실행환경... GC... 사용여부확인 == 오브젝트 참조로 판단 ... FHitResult의 Actor는 약포인터로 구현됨.. 따라서 유효한지 점검 필요
+
+
+## **디버그 드로잉**
+
+- 공격 범위가 시각적으로 보이게함
+- DrawDebugHelpers.h 헤더 추가
+- DrawDebugCapsule 함수 사용하여 원이 움직인 궤적 표현
