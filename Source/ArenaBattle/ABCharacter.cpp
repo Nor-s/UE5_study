@@ -62,12 +62,12 @@ void AABCharacter::BeginPlay()
 	Super::BeginPlay();
 		
 	// Weapon
-	FName WeaponSocket(TEXT("hand_rSocket"));
-	auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
-	if (nullptr != CurWeapon)
-	{
-		CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
-	}
+	// FName WeaponSocket(TEXT("hand_rSocket"));
+	// auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
+	// if (nullptr != CurWeapon)
+	// {
+	// 	CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+	// }
 	
 }
 
@@ -189,7 +189,23 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(TEXT("Look Up / Down Mouse"), this, &AABCharacter::LookUp);
 	PlayerInputComponent->BindAxis(TEXT("Turn Right / Left Mouse"), this, &AABCharacter::Turn);
 }
-
+bool AABCharacter::CanSetWeapon()
+{
+	return (nullptr == CurrentWeapon);
+	
+}
+void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
+{
+	ABCHECK(nullptr != NewWeapon && nullptr == CurrentWeapon);
+	FName WeaponSocket(TEXT("hand_rSocket"));
+	if(nullptr != NewWeapon)
+	{
+		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+		NewWeapon->SetOwner(this);
+		CurrentWeapon = NewWeapon;
+	}
+	
+}
 void AABCharacter::UpDown(float NewAxisValue)
 {
 	switch (CurrentControlMode)

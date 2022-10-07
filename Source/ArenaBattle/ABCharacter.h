@@ -44,11 +44,18 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	bool CanSetWeapon();
+	// https://forums.unrealengine.com/t/class-keyword-in-member-declaration/107396/8
+	void SetWeapon(class AABWeapon* NewWeapon);
+
 	UPROPERTY(VisibleAnywhere, Category= Camera)
 	USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere, Category= Camera)
 	UCameraComponent* Camera;
+	
+	UPROPERTY(VisibleAnywhere, Category= Weapon)
+	class AABWeapon* CurrentWeapon;
 
 
 private:
