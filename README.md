@@ -99,7 +99,7 @@
 
 > float 값을 0과 비교하는 것 보다는 KINDA_SMALL_NUMBER를 사용하는 것이 좋음
 
-> UE4.2 부터 위젯의 초기화 시점이 PostinitializeComponents 에서 BeginPlay로 변경됨
+> UE4.2 부터 위젯의 초기화 시점이 PostinitializeComponents 에서 BeginPlay로 변경됨 (주의, CharacterStatComponent의 SetNewLevel => BeginPlay에서 호출하도록 수정)
 
 - UI 블프 > 그래프 탭 > 툴바 클래스 세팅 > 디테일 > 부모 클래스 변경
 - ABCharacterWidget에서 프로그레스바 이름의 위젯 검색, 속성 업데이트하는 로직
