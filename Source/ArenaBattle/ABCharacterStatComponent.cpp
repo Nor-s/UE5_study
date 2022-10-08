@@ -23,6 +23,7 @@ void UABCharacterStatComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+	SetNewLevel(Level);
 	
 }
 
@@ -38,7 +39,6 @@ void UABCharacterStatComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 void UABCharacterStatComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	SetNewLevel(Level);
 }
 
 void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
