@@ -38,3 +38,24 @@
 ### 게임 인스턴스에서 CSV 로딩
 
 - 게임인스턴스 클래스에,  테이블 데이터를 관리하는 DataTable 언리얼 오브젝트 멤버변수 선언
+
+
+## 액터 컴포넌트 제작
+
+- 새로운 액터 컴포넌트 클래스 생성 및 캐릭터에 부착 (캐릭터 스탯 관리하는 컴포넌트)
+- 새로운 C++ 클래스 > ActorComponent
+
+- 자동으로 제공되는 템플릿 코드 == BeginPlay, TickComponent 함수
+- 스탯에 변경이 일어날 때만 관련 데이터 처리 == TickComponent 함수 필요 없음
+- InitializeComponent 는 액터의 PostInitializeComponents 에 대응
+    - PostInitialzieComponents 함수가 호출되기 바로 전에 호출됨
+    - bWantInitizeComponent 값이 true여야함
+
+
+### 직렬화 기능
+
+- 언리얼 오브젝트의 직렬화 기능
+  - UPROPERTY 속성을 저장하고 로딩 가능
+  - Transient 키워드를 추가해 해당 속성을 직렬화에서 제외시킬 수 있음 (CurrentHP값은 게임 시작할 때마다 변경됨, 이 예제는 이 값을 저장할 필요가 없음)
+
+  

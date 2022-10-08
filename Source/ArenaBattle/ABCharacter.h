@@ -48,15 +48,19 @@ public:
 	// https://forums.unrealengine.com/t/class-keyword-in-member-declaration/107396/8
 	void SetWeapon(class AABWeapon* NewWeapon);
 
+	UPROPERTY(VisibleAnywhere, Category= Weapon)
+	class AABWeapon* CurrentWeapon;
+	
+	UPROPERTY(VisibleAnywhere, Category= Weapon)
+	class UABCharacterStatComponent* CharacterStat;
+	
+
 	UPROPERTY(VisibleAnywhere, Category= Camera)
 	USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere, Category= Camera)
 	UCameraComponent* Camera;
 	
-	UPROPERTY(VisibleAnywhere, Category= Weapon)
-	class AABWeapon* CurrentWeapon;
-
 
 private:
 	void UpDown(float NewAxisValue);

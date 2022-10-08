@@ -6,7 +6,6 @@
 UABGameInstance::UABGameInstance()
 {
 	FString CharacterDataPath = TEXT("/Game/Book/GameData/ABCharacterData.ABCharacterData");
-
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_ABCHARACTER(*CharacterDataPath);
 	ABCHECK(DT_ABCHARACTER.Succeeded());
 	ABCharacterTable = DT_ABCHARACTER.Object;
