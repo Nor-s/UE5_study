@@ -9,6 +9,7 @@
 #include "ABCharacterStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnHPIsZeroDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnHPChangedDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ARENABATTLE_API UABCharacterStatComponent : public UActorComponent
@@ -30,12 +31,12 @@ protected:
 public:
 	void SetNewLevel(int32 NewLevel);
 	void SetDamage(float NewDamage);
-	// void SetHP(float NewHP);
+	void SetHP(float NewHP);
 	float GetAttack();
-	// float GetHPRatio();
+	float GetHPRatio();
 
 	FOnHPIsZeroDelegate OnHPIsZero;
-	// FOnHPChangedDelegate OnHPChanged;
+	FOnHPChangedDelegate OnHPChanged;
 
 	// 데이터를 관리하는 변수들
 private:

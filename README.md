@@ -91,6 +91,23 @@
 - 크기는 위젯의 작업공간과 일치하게 
 
 
-## 
+## UI 와 데이터 연동
+
+- UI 작업 : 디자이너  = 애니메이션 설계 작업 : 애님 그래프
+- UI 로직 은 C++, 위젯 블프가 사용하는 기반 C++ 클래스는 UserWidget
+  - UserWidget을 상속받는 클래스를 생성해야함
+
+> float 값을 0과 비교하는 것 보다는 KINDA_SMALL_NUMBER를 사용하는 것이 좋음
+
+> UE4.2 부터 위젯의 초기화 시점이 PostinitializeComponents 에서 BeginPlay로 변경됨
+
+- UI 블프 > 그래프 탭 > 툴바 클래스 세팅 > 디테일 > 부모 클래스 변경
+- ABCharacterWidget에서 프로그레스바 이름의 위젯 검색, 속성 업데이트하는 로직
+
+- UI 초기화 시점
+  - UI 시스템 준비되면 NativeConstruct 함수가 호출됨
+  - UI 생성은 플레이어 컨트롤러의 BeginPlay에서 호출되므로
+  - BeginPlay 전에 호출된 PostInitializeComponents 함수에서 발생한 명령은 UI에 반영되지 않음
+  - 따라서, NativeConstruct 함수에서 위젯 내용을 업데이트해야함
 
 
