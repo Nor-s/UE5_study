@@ -58,4 +58,39 @@
   - UPROPERTY 속성을 저장하고 로딩 가능
   - Transient 키워드를 추가해 해당 속성을 직렬화에서 제외시킬 수 있음 (CurrentHP값은 게임 시작할 때마다 변경됨, 이 예제는 이 값을 저장할 필요가 없음)
 
+## 캐릭터 UI 제작
+
+
+- 위젯 블루프린트로 UI 위젯 제작
+  - User Interface > Widget Blueprint
+
+- 캐릭 위 작은 프로그레스바
   
+- 작업공간 크기 변경 Fill Screen > Custom 
+
+- VerticalBox로 프로그레스바 컨트롤 감싸기 > 세로로 UI 컨트롤을 정렬해줌
+- 위 아래 Spacer 컨트롤을 추가하여 프로그레스바 중간에 위치
+    - 우측 슬롯 섹션 > 채우기 > 비율 설정
+
+## 모듈과 빌드 설정 (캐릭터에 UI 부착)
+
+- UI 위젯을 부착할 수 있도록 UWidgetComponent 라는 클래스를 제공함
+- 이를 ABCharacter.h 에 추가
+- 프로젝트 설정 > UI에 관련된 엔진 모듈 지정
+  - ArenaBattle.Build.cs 파일에서 현재 사용하고 있는 UE 모듈들을 확인 가능
+  - ArenaBattle.Build.cs 파일에 UMG라는 모듈을 차가하면 위젯 컴포넌트를 사용할 수 있음
+    ``PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG" });``
+  - 언리얼 빌드 툴이 Build.cs 파일을 분석해 프로젝트 컴파일 설정을 조정함
+  - ``UMG``는 Source>Runtime>UMG 폴더에 위치함
+  - UMG 모듈의 Public/Components/WidgetComponent.h 를 ABCharacter.h 에 추가하여 위젯설정 가능
+
+> 언리얼 빌드 툴 == C# 으로 제작된 명령행 툴, C# 응용프로그램 기능 == 실행 중에 C# 코드를 컴파일하고 사용하는 기능, 언리얼 빌드툴은 실행 중에 Build.cs를 분석 및 컴파일하여 개발환경을 생성
+
+
+- UI 위젯을 항상 플레이어를 향해보도록 설정 => Screen 모드 
+- 크기는 위젯의 작업공간과 일치하게 
+
+
+## 
+
+
