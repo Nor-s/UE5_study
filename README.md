@@ -159,3 +159,91 @@
   - NPC는 정찰 중에 플레이어 감지할 경우 정찰 바로 중단, 추격 시작
 
 
+## NPC의 공격
+
+- 왼쪽 추격로직에서 따라 잡으면 공격하는 기능을 추가
+- 셀렉터 컴포짓 추가하여 추격과 공격을 분기
+- 블랙보드의 값을 참조하지 않고, 타겟이 공격범위에 있는지 판단하는 데코레이터
+  - CalculateRawConditionValue 함수를 오버라이드 (const로 선언되었음을 주의)
+
+### BTTaskNode
+
+- 공격 태스크
+- 공격 애니메이션 끝날 때까지 대기
+- ExecuteTask의 결과 값을 InProgress로 반환, 공격이 끝났을 때 태스크 끝을 알림
+- FinishLatentTask를 호출하여 태스크 종료
+  - Tick 기능을 활성화해야함
+
+### 회전 문제
+
+- NPC 뒤에 있어도 계속해서 NPC는 같은 방향을 공격함
+- BTTaskNode 태스크 생성, 플레이어 폰을 향해 일정한 속도로 회전하는 FMath::RInterpTo 함수 사용
+- 공격로직 컴포짓을 심플 패러럴 컴포짓으로 대체 후, 공격을 메인, 회전을 보조로 설정
+- 심플 패러럴 컴포짓 => 공격과 회전을 동시 실행
+
+
+
+### 오류
+- 참고 https://mingyu0403.tistory.com/266
+```
+Fatal error: [File:D:\build\++UE5\Sync\Engine\Source\Runtime\Core\Private\Windows\WindowsPlatformMisc.cpp] [Line: 441]
+Pure virtual function being called
+
+
+
+
+0x00007fff5c9964f6 UnrealEditor-Core.dll!PureCallHandler() [D:\build\++UE5\Sync\Engine\Source\Runtime\Core\Private\Windows\WindowsPlatformMisc.cpp:443]
+0x00007fffb5356e44 VCRUNTIME140.dll!UnknownFunction []
+0x00007fff5ba4c546 UnrealEditor-CoreUObject.dll!UGCObjectReferencer::VerifyGCObjectNames() [D:\build\++UE5\Sync\Engine\Source\Runtime\CoreUObject\Private\Misc\GCObjectReferencer.cpp:199]
+0x00007fff5ba1a151 UnrealEditor-CoreUObject.dll!TBaseUObjectMethodDelegateInstance<0,UGCObjectReferencer,void __cdecl(void),FDefaultDelegateUserPolicy>::ExecuteIfSafe() [D:\build\++UE5\Sync\Engine\Source\Runtime\Core\Public\Delegates\DelegateInstancesImpl.h:611]
+0x00007fff5ba8217d UnrealEditor-CoreUObject.dll!TMulticastDelegate<void __cdecl(void),FDefaultDelegateUserPolicy>::Broadcast() [D:\build\++UE5\Sync\Engine\Source\Runtime\Core\Public\Delegates\DelegateSignatureImpl.inl:967]
+0x00007fff5bc196c8 UnrealEditor-CoreUObject.dll!CollectGarbageInternal() [D:\build\++UE5\Sync\Engine\Source\Runtime\CoreUObject\Private\UObject\GarbageCollection.cpp:2232]
+0x00007fff5bc18eec UnrealEditor-CoreUObject.dll!CollectGarbage() [D:\build\++UE5\Sync\Engine\Source\Runtime\CoreUObject\Private\UObject\GarbageCollection.cpp:2543]
+0x00007fff359b1540 UnrealEditor-UnrealEd.dll!UEditorEngine::EndPlayMap() [D:\build\++UE5\Sync\Engine\Source\Editor\UnrealEd\Private\PlayLevel.cpp:415]
+0x00007fff3539fa40 UnrealEditor-UnrealEd.dll!UEditorEngine::Tick() [D:\build\++UE5\Sync\Engine\Source\Editor\UnrealEd\Private\EditorEngine.cpp:2097]
+0x00007fff35d2aac6 UnrealEditor-UnrealEd.dll!UUnrealEdEngine::Tick() [D:\build\++UE5\Sync\Engine\Source\Editor\UnrealEd\Private\UnrealEdEngine.cpp:474]
+0x00007ff7691282f6 UnrealEditor.exe!FEngineLoop::Tick() [D:\build\++UE5\Sync\Engine\Source\Runtime\Launch\Private\LaunchEngineLoop.cpp:5215]
+0x00007ff769140d9c UnrealEditor.exe!GuardedMain() [D:\build\++UE5\Sync\Engine\Source\Runtime\Launch\Private\Launch.cpp:183]
+0x00007ff769140e8a UnrealEditor.exe!GuardedMainWrapper() [D:\build\++UE5\Sync\Engine\Source\Runtime\Launch\Private\Windows\LaunchWindows.cpp:147]
+0x00007ff769143c4d UnrealEditor.exe!LaunchWindowsStartup() [D:\build\++UE5\Sync\Engine\Source\Runtime\Launch\Private\Windows\LaunchWindows.cpp:283]
+0x00007ff769155564 UnrealEditor.exe!WinMain() [D:\build\++UE5\Sync\Engine\Source\Runtime\Launch\Private\Windows\LaunchWindows.cpp:330]
+0x00007ff769158736 UnrealEditor.exe!__scrt_common_main_seh() [d:\a01\_work\6\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:288]
+0x00007fffd7f0244d KERNEL32.DLL!UnknownFunction []
+0x00007fffd980df78 ntdll.dll!UnknownFunction []
+```
+
+## 궁금점
+
+- 델리게이트.. AddLambda 등으로 등록하고, 등록한 객체가 사라지면 추가한 람다 등 도 사라지는지? 등록한 채인지? 
+    - 참고: https://kyoun.tistory.com/143
+    - [참고](https://docs.unrealengine.com/5.0/en-US/multicast-delegates-in-unreal-engine/):It is always safe to call Broadcast() on a multi-cast delegate, even if nothing is bound. The only time you need to be careful is if you are using a delegate to initialize output variables, which is generally very bad to do.
+    - [참고](https://forums.unrealengine.com/t/bind-delegate-with-one-parameter/295500/13)
+    - [참고](https://forums.unrealengine.com/t/do-weaklambdas-need-extra-steps-to-unbind/483656): AddLambda 등에서 리턴하는 FDelegateHandle 로 바인딩해제 해야함
+- 예제에서 AddLambda가 여러번 호출되는 함수안에 포함되어 있기에 아래 코드로 실험해봄
+
+  ```cpp
+    ABCharacter->OnAttackEnd.AddLambda([this]() -> void {
+        ABLOG(Warning, TEXT("Attack End"));
+        IsAttacking = false;
+    }); 
+  ```
+
+  - 로그 결과는 다음과 같음.
+    - 공격마다 람다호출이 증가함을 확인 가능
+  
+  ``` bash
+  // 결과
+  ArenaBattle: Warning: AABCharacter::PostInitializeComponents::<lambda_e240e047e357246560126bb6d46bfdd0>::operator ()(175) OnNextAttackCheck
+  ArenaBattle: Warning: UBTTask_Attack::ExecuteTask::<lambda_03082f79029a61ba81a4d9efea3f9cd4>::operator ()(24) Attack End
+  ArenaBattle: Warning: AABCharacter::AttackCheck(396) Hit Actor Name : ABCharacter_0
+  ArenaBattle: Warning: AABCharacter::TakeDamage(199) Actor : ABCharacter_0 took Damage : 10.000000
+  ArenaBattle: Warning: AABCharacter::PostInitializeComponents::<lambda_e240e047e357246560126bb6d46bfdd0>::operator ()(175) OnNextAttackCheck
+  ArenaBattle: Warning: UBTTask_Attack::ExecuteTask::<lambda_03082f79029a61ba81a4d9efea3f9cd4>::operator ()(24) Attack End
+  ArenaBattle: Warning: UBTTask_Attack::ExecuteTask::<lambda_03082f79029a61ba81a4d9efea3f9cd4>::operator ()(24) Attack End
+  ArenaBattle: Warning: AABCharacter::AttackCheck(396) Hit Actor Name : ABCharacter_0
+  ArenaBattle: Warning: AABCharacter::TakeDamage(199) Actor : ABCharacter_0 took Damage : 10.000000
+  ArenaBattle: Warning: AABCharacter::PostInitializeComponents::<lambda_e240e047e357246560126bb6d46bfdd0>::operator ()(175) OnNextAttackCheck
+  ArenaBattle: Warning: UBTTask_Attack::ExecuteTask::<lambda_03082f79029a61ba81a4d9efea3f9cd4>::operator ()(24) Attack End
+  ArenaBattle: Warning: UBTTask_Attack::ExecuteTask::<lambda_03082f79029a61ba81a4d9efea3f9cd4>::operator ()(24) Attack End
+  ArenaBattle: Warning: UBTTask_Attack::ExecuteTask::<lambda_03082f79029a61ba81a4d9efea3f9cd4>::operator ()(24) Attack End
+  ```
