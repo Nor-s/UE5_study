@@ -12,6 +12,7 @@
 #include "ABAIController.h"
 #include "ABCharacterSetting.h"
 #include "ABGameInstance.h"
+#include "ABPlayerController.h"
 
 
 // Sets default values
@@ -48,9 +49,6 @@ AABCharacter::AABCharacter()
 		GetMesh()->SetAnimInstanceClass(WARRIOR_ANIM.Class);
 	}
 
-	
-
-
 	ArmLengthSpeed = 3.0f;
 	ArmRotationSpeed = 10.0f;
 	// GetCharacterMovement()->JumpZVelocity = 600.0f;
@@ -68,7 +66,7 @@ AABCharacter::AABCharacter()
 	HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 	HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));
-	if(UI_HUD.Succeeded())
+	if (UI_HUD.Succeeded())
 	{
 		HPBarWidget->SetWidgetClass(UI_HUD.Class);
 		HPBarWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
@@ -77,31 +75,143 @@ AABCharacter::AABCharacter()
 	AIControllerClass = AABAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	AssetIndex = 4;
+
+	Super::SetActorHiddenInGame(true);
+	HPBarWidget->SetHiddenInGame(true);
+	SetCanBeDamaged(false);
+
+	DeadTimer = 5.0f;
+
 }
 
 // Called when the game starts or when spawned
 void AABCharacter::BeginPlay()
 {
+	ABLOG(Warning, TEXT("BeginPlay"));
 	Super::BeginPlay();
-
-	auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
-	if (nullptr != CharacterWidget)
+	bIsPlayer = IsPlayerControlled();
+	auto DefaultSetting = GetDefault<UABCharacterSetting>();
+	if (bIsPlayer)
 	{
-		CharacterWidget->BindCharacterStat(CharacterStat);
+		ABLOG(Warning, TEXT("Player"));
+		ABPlayerController = Cast<AABPlayerController>(GetController());
+		ABCHECK(nullptr != ABPlayerController);
+		AssetIndex = 4;
 	}
-	if(!IsPlayerControlled())
+	else
 	{
-		auto DefaultSetting = GetDefault<UABCharacterSetting>();
-		int32 RandIndex = FMath::RandRange(0, DefaultSetting->CharacterAssets.Num() -1);
-		CharacterAssetToLoad = DefaultSetting->CharacterAssets[RandIndex];
+		ABLOG(Warning, TEXT("AI"));
+		ABAIController = Cast<AABAIController>(GetController());
+		ABCHECK(nullptr != ABAIController);
+		AssetIndex = FMath::RandRange(0, DefaultSetting->CharacterAssets.Num() - 1);
+	}
 
-		auto ABGameInstance = Cast<UABGameInstance>(GetGameInstance());
-		if(nullptr != ABGameInstance)
+
+	CharacterAssetToLoad = DefaultSetting->CharacterAssets[AssetIndex];
+	auto ABGameInstance = Cast<UABGameInstance>(GetGameInstance());
+	ABCHECK(nullptr != ABGameInstance);
+	SetCharacterState(ECharacterState::LOADING);
+	AssetStreamingHandle = ABGameInstance->StreamableManager.RequestAsyncLoad(
+		CharacterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+}
+
+void AABCharacter::SetCharacterState(ECharacterState NewState)
+{
+	ABCHECK(CurrentState != NewState);
+	CurrentState = NewState;
+
+	switch (CurrentState)
+	{
+	case ECharacterState::LOADING:
 		{
-			AssetStreamingHandle = ABGameInstance->StreamableManager.RequestAsyncLoad(CharacterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+			if (bIsPlayer)
+			{
+				DisableInput(ABPlayerController);
+			
+				// ABPlayerController->GetHUDWidget()->BindCharacterStat(CharacterStat);
+			
+				// auto ABPlayerState = Cast<AABPlayerState>(PlayerState);
+				// ABCHECK(nullptr != ABPlayerState);
+				// CharacterStat->SetNewLevel(ABPlayerState->GetCharacterLevel());
+			}
+
+			SetActorHiddenInGame(true);
+			HPBarWidget->SetHiddenInGame(true);
+			SetCanBeDamaged(false);
+			break;
+		}
+	case ECharacterState::READY:
+		{
+			SetActorHiddenInGame(false);
+			HPBarWidget->SetHiddenInGame(false);
+			SetCanBeDamaged(true);
+
+			CharacterStat->OnHPIsZero.AddLambda([this]() -> void
+			{
+				SetCharacterState(ECharacterState::DEAD);
+			});
+
+			auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
+			ABCHECK(nullptr != CharacterWidget);
+			CharacterWidget->BindCharacterStat(CharacterStat);
+	
+			if (bIsPlayer)
+			{
+				SetControlMode(EControlMode::DIABLO);
+				GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+				EnableInput(ABPlayerController);
+			}
+			else
+			{
+				SetControlMode(EControlMode::NPC);
+				GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+				ABAIController->RunAI();
+			}
+
+			break;
+		}
+	case ECharacterState::DEAD:
+		{
+			SetActorEnableCollision(false);
+			GetMesh()->SetHiddenInGame(false);
+			HPBarWidget->SetHiddenInGame(true);
+			ABAnim->SetDeadAnim();
+			SetCanBeDamaged(false);
+
+			if (bIsPlayer)
+			{
+				DisableInput(ABPlayerController);
+			}
+			else
+			{
+				ABAIController->StopAI();
+			}
+			
+			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]() -> void
+			{
+				if (bIsPlayer)
+				{
+					ABLOG(Warning, TEXT("Player Dead"));
+					ABPlayerController->RestartLevel();
+				}
+				else
+				{
+					ABLOG(Warning, TEXT("Enemy Dead"));
+					Destroy();
+				}
+			}), DeadTimer, false);
+
+			break;
 		}
 	}
 }
+
+ECharacterState AABCharacter::GetCharacterState() const
+{
+	return CurrentState;
+}
+
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
 {
@@ -206,10 +316,10 @@ void AABCharacter::PostInitializeComponents()
 		ABAnim->SetDeadAnim();
 		SetActorEnableCollision(false);
 	});
-
-
 }
-float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+
+float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+                               AActor* DamageCauser)
 {
 	const float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
@@ -218,11 +328,12 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const & DamageEv
 
 	return FinalDamage;
 }
+
 void AABCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if(IsPlayerControlled())
+	if (IsPlayerControlled())
 	{
 		SetControlMode(EControlMode::DIABLO);
 		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
@@ -248,23 +359,24 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(TEXT("Look Up / Down Mouse"), this, &AABCharacter::LookUp);
 	PlayerInputComponent->BindAxis(TEXT("Turn Right / Left Mouse"), this, &AABCharacter::Turn);
 }
+
 bool AABCharacter::CanSetWeapon()
 {
 	return (nullptr == CurrentWeapon);
-	
 }
+
 void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
 {
 	ABCHECK(nullptr != NewWeapon && nullptr == CurrentWeapon);
 	FName WeaponSocket(TEXT("hand_rSocket"));
-	if(nullptr != NewWeapon)
+	if (nullptr != NewWeapon)
 	{
 		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
 		NewWeapon->SetOwner(this);
 		CurrentWeapon = NewWeapon;
 	}
-	
 }
+
 void AABCharacter::UpDown(float NewAxisValue)
 {
 	switch (CurrentControlMode)
@@ -373,13 +485,14 @@ void AABCharacter::AttackEndComboState()
 	CanNextCombo = false;
 	CurrentCombo = 0;
 }
+
 void AABCharacter::AttackCheck()
 {
 	FHitResult HitResult;
 	// 무시목록: this
 	FCollisionQueryParams Params(NAME_None, false, this);
 	bool bResult = GetWorld()->SweepSingleByChannel(
-		HitResult, 
+		HitResult,
 		GetActorLocation(), // 탐색 시작: 액터 있는곳
 		GetActorLocation() + GetActorForwardVector() * AttackRange, // 탐색끝: 액터 시선방향으로 공격 범위만큼 떨어진곳
 		FQuat::Identity, // 회전값 기본
@@ -397,17 +510,18 @@ void AABCharacter::AttackCheck()
 	float DebugLifeTime = 5.0f;
 
 	DrawDebugCapsule(GetWorld(),
-		Center,
-		HalfHeight,
-		AttackRadius,
-		CapsuleRot,
-		DrawColor,
-		false,
-		DebugLifeTime);
+	                 Center,
+	                 HalfHeight,
+	                 AttackRadius,
+	                 CapsuleRot,
+	                 DrawColor,
+	                 false,
+	                 DebugLifeTime);
 
 #endif
-	if(bResult) {
-		if(HitResult.GetActor())
+	if (bResult)
+	{
+		if (HitResult.GetActor())
 		{
 			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.GetActor()->GetName());
 			FDamageEvent DamageEvent;
@@ -418,10 +532,11 @@ void AABCharacter::AttackCheck()
 
 void AABCharacter::OnAssetLoadCompleted()
 {
-	USkeletalMesh* AssetLoaded = Cast<USkeletalMesh> (AssetStreamingHandle->GetLoadedAsset());
+	ABLOG(Warning, TEXT("OnAssetLoadCompleted ----"));
+	USkeletalMesh* AssetLoaded = Cast<USkeletalMesh>(AssetStreamingHandle->GetLoadedAsset());
 	AssetStreamingHandle.Reset();
-	if(nullptr != AssetLoaded)
-	{
-		GetMesh()->SetSkeletalMesh(AssetLoaded);
-	}
+	ABCHECK(nullptr != AssetLoaded);
+	GetMesh()->SetSkeletalMesh(AssetLoaded);
+
+	SetCharacterState(ECharacterState::READY);
 }

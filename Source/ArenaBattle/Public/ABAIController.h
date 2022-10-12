@@ -16,10 +16,14 @@ class ARENABATTLE_API AABAIController : public AAIController
 public:
 	AABAIController();
 	virtual void OnPossess(APawn* InPawn) override;
+	void RunAI();
+	void StopAI();
 
 	static const FName HomePosKey;
 	static const FName PatrolPosKey;
 	static const FName TargetKey;
+
+	
 
 private:
 	UPROPERTY()
