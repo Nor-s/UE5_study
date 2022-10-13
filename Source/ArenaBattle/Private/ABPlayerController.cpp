@@ -51,3 +51,8 @@ void AABPlayerController::NPCKill(class AABCharacter* KilledNPC) const
 {
 	ABPlayerState->AddExp(KilledNPC->GetExp());
 }
+
+void AABPlayerController::AddGameScore() const
+{
+	ABPlayerState->AddGameScore();
+}

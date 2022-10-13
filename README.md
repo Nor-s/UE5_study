@@ -37,3 +37,27 @@ enum class ECharacterState : uint8
   - 그 포인터 값을 플레이어 컨트롤러의 PlayerState의 속성에 저장함
   - 플레이어 컨트롤러 설정 완료시점: 게임 모드의 PostLogin 함수
 
+
+## 스코어 구현
+
+- 스코어 
+  - 입장시 0
+  - NPC 처치 1 
+
+- 길 찾기 영역 크게 설정 (내비메쉬 brush settings)
+
+### 게임 데이터 관리
+
+- 게임 스테이트 클래스(AGameStateBase) 사용
+- 게임 데이터만 분리 가능
+
+### LastHitBy
+
+- 마지막으로 대미지를 입힌 컨트롤러의 기록
+- 액터가 제거될 때 마지막에 피격을 가한 플레이어의 정보를 얻어올 수 있음
+
+> 경험치 또한 LastHitBy를 사용해 처리하는 것이 좋음
+
+### GetPlayerControllerIterator
+
+- 현재 게임에 참여 중인 플레이어 컨트롤러의 목록 (월드에서 제공)

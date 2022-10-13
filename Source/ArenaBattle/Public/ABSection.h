@@ -45,6 +45,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+    void OnKeyNPCDestroyed(AActor* DestroyedActor);
+    
 private:
 	// 출입구
 	UPROPERTY(VisibleAnywhere, Category=Mesh, Meta = (AllowPrivateAccess=true))
