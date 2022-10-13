@@ -4,6 +4,7 @@
 #include "ABGameMode.h"
 #include "ABCharacter.h"
 #include "ABPlayerController.h"
+#include "ABPlayerState.h"
 
 
 // 주의: 폰을 생성하고 지정하는 것이 아니라, 클래스 정보를 지정함
@@ -13,11 +14,14 @@ AABGameMode::AABGameMode()
 	// 언리얼 오브젝트의 클래스 정보는 언리얼 헤더 툴에 의해 자동으로 생성, StaticClass() 함수 호출해 가져옴
 	DefaultPawnClass = AABCharacter::StaticClass();
 	PlayerControllerClass = AABPlayerController::StaticClass();
+	PlayerStateClass = AABPlayerState::StaticClass();
 }
 
-void AABGameMode::PostLogin(APlayerController * NewPlayer)
+void AABGameMode::PostLogin(APlayerController* NewPlayer)
 {
-	ABLOG(Warning, TEXT("PostLogin"));
 	Super::PostLogin(NewPlayer);
-	ABLOG(Warning, TEXT("PostLogin End"));
+
+	auto ABPlayerState = Cast<AABPlayerState>(NewPlayer->PlayerState);
+	ABCHECK(nullptr != ABPlayerState);
+	ABPlayerState->InitPlayerData();
 }

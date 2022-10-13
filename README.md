@@ -24,4 +24,16 @@ enum class ECharacterState : uint8
 
 ## 플레이어 데이터와 UI 연동
 
+- PlayerState
+  - 게임 점수와 같은 플레이어의 정보를 관리하기 위한 용도
+  - FString 타입의 PlayerName 속성
+  - float 타입의 Score 속성
+  
+
+
+
+- 게임 모드의 PlayerStateClass에 PlayerState 클래스 지정
+  - 엔진은 플레이어 컨트롤러가 초기화될 때 함께 해당 클래스의 인스턴스를 생성
+  - 그 포인터 값을 플레이어 컨트롤러의 PlayerState의 속성에 저장함
+  - 플레이어 컨트롤러 설정 완료시점: 게임 모드의 PostLogin 함수
 

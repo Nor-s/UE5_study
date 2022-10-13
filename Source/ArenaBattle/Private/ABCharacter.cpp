@@ -13,6 +13,8 @@
 #include "ABCharacterSetting.h"
 #include "ABGameInstance.h"
 #include "ABPlayerController.h"
+#include "ABPlayerState.h"
+#include "ABHUDWidget.h"
 
 
 // Sets default values
@@ -129,11 +131,11 @@ void AABCharacter::SetCharacterState(ECharacterState NewState)
 			{
 				DisableInput(ABPlayerController);
 			
-				// ABPlayerController->GetHUDWidget()->BindCharacterStat(CharacterStat);
+				ABPlayerController->GetHUDWidget()->BindCharacterStat(CharacterStat);
 			
-				// auto ABPlayerState = Cast<AABPlayerState>(PlayerState);
-				// ABCHECK(nullptr != ABPlayerState);
-				// CharacterStat->SetNewLevel(ABPlayerState->GetCharacterLevel());
+				auto ABPlayerState = Cast<AABPlayerState>(GetPlayerState());
+				ABCHECK(nullptr != ABPlayerState);
+				CharacterStat->SetNewLevel(ABPlayerState->GetCharacterLevel());
 			}
 
 			SetActorHiddenInGame(true);
