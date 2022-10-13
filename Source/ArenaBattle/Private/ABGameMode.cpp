@@ -19,7 +19,9 @@ AABGameMode::AABGameMode()
 
 void AABGameMode::PostLogin(APlayerController* NewPlayer)
 {
+	ABLOG(Warning, TEXT("Super::PostLogin"));
 	Super::PostLogin(NewPlayer);
+	ABLOG(Warning, TEXT("PostLogin"));
 
 	auto ABPlayerState = Cast<AABPlayerState>(NewPlayer->PlayerState);
 	ABCHECK(nullptr != ABPlayerState);

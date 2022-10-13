@@ -17,7 +17,9 @@ public:
 	// Sets default values for this character's properties
 	AABCharacter();
 	void SetCharacterState(ECharacterState NewState);
+	
 	ECharacterState GetCharacterState() const;
+	int32 GetExp() const;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -39,7 +41,7 @@ protected:
 	float ArmLengthSpeed = 0.0f;
 	float ArmRotationSpeed = 0.0f;
 	
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override; 

@@ -214,7 +214,10 @@ ECharacterState AABCharacter::GetCharacterState() const
 	return CurrentState;
 }
 
-
+int32 AABCharacter::GetExp() const
+{
+	return CharacterStat->GetDropExp();
+}
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
 {
 	CurrentControlMode = NewControlMode;
@@ -327,7 +330,15 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
 
 	CharacterStat->SetDamage(FinalDamage);
-
+	if (CurrentState == ECharacterState::DEAD)
+	{
+		if (EventInstigator->IsPlayerController())
+		{
+			auto PlayerController = Cast<AABPlayerController>(EventInstigator);
+			ABCHECK(nullptr != PlayerController, 0.0f);
+			PlayerController->NPCKill(this);
+		}
+	}
 	return FinalDamage;
 }
 

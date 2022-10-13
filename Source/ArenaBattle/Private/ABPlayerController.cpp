@@ -4,6 +4,7 @@
 #include "ABPlayerController.h"
 #include "ABHUDWidget.h"
 #include "ABPlayerState.h"
+#include "ABCharacter.h"
 
 AABPlayerController::AABPlayerController()
 {
@@ -28,6 +29,7 @@ void AABPlayerController::OnPossess(APawn* aPawn)
 
 void AABPlayerController::BeginPlay()
 {
+	ABLOG(Warning, TEXT("==========PlayerContorller::BeginPlay==========="));
 	Super::BeginPlay();
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
@@ -43,4 +45,9 @@ void AABPlayerController::BeginPlay()
 UABHUDWidget* AABPlayerController::GetHUDWidget() const
 {
 	return HUDWidget;
+}
+
+void AABPlayerController::NPCKill(class AABCharacter* KilledNPC) const
+{
+	ABPlayerState->AddExp(KilledNPC->GetExp());
 }

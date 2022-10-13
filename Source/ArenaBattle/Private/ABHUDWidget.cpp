@@ -15,6 +15,7 @@ void UABHUDWidget::BindCharacterStat(UABCharacterStatComponent* CharacterStat)
 
 void UABHUDWidget::BindPlayerState(AABPlayerState* PlayerState)
 {
+	ABLOG(Warning, TEXT("WIDGET::BindPlayerState"));
 	ABCHECK(nullptr != PlayerState);
 	CurrentPlayerState = PlayerState;
 	PlayerState->OnPlayerStateChanged.AddUObject(this, &UABHUDWidget::UpdatePlayerState);
@@ -45,15 +46,16 @@ void UABHUDWidget::NativeConstruct()
 void UABHUDWidget::UpdateCharacterStat()
 {
 	ABCHECK(CurrentCharacterStat.IsValid());
-
+	ExpBar->SetPercent(CurrentPlayerState->GetExpRatio());
 	HPBar->SetPercent(CurrentCharacterStat->GetHPRatio());
 }
 
 void UABHUDWidget::UpdatePlayerState()
 {
+	ABLOG(Warning, TEXT("WIDGET::UpdatePlayerState"));
 	ABCHECK(CurrentPlayerState.IsValid());
 
-	// ExpBar->SetPercent(CurrentPlayerState->GetExpRatio());
+	ExpBar->SetPercent(CurrentPlayerState->GetExpRatio());
 	PlayerName->SetText(FText::FromString(CurrentPlayerState->GetPlayerName()));
 	PlayerLevel->SetText(FText::FromString(FString::FromInt(CurrentPlayerState->GetCharacterLevel())));
 	CurrentScore->SetText(FText::FromString(FString::FromInt(CurrentPlayerState->GetGameScore())));
