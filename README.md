@@ -215,7 +215,6 @@ Pure virtual function being called
 ## 궁금점
 
 - 델리게이트.. AddLambda 등으로 등록하고, 등록한 객체가 사라지면 추가한 람다 등 도 사라지는지? 등록한 채인지?
-    - 14장에서 실험결과, 객체가 사라지면 등록한 람다도 사라짐
     - 참고: https://kyoun.tistory.com/143
     - [참고](https://docs.unrealengine.com/5.0/en-US/multicast-delegates-in-unreal-engine/):It is always safe to call Broadcast() on a multi-cast delegate, even if nothing is bound. The only time you need to be careful is if you are using a delegate to initialize output variables, which is generally very bad to do.
     - [참고](https://forums.unrealengine.com/t/bind-delegate-with-one-parameter/295500/13)
